@@ -11,6 +11,7 @@
 #include "labsland/simulations/watertanksimulation.h"
 #include "rhlab/butterfly.h"
 #include "rhlab/matrix.h"
+#include "rhlab/computerFan.h"
 #include "deusto/door.h"
 #include "deusto/watertankDeusto.h"
 #include "labsland/simulations/utils/communicatorfiles.h"
@@ -105,6 +106,8 @@ int main(int argc, char * argv[]) {
 
     if (simulation == "matrix") {
         runner = new ConcreteSimulationRunner<RHLab::LEDMatrix::MatrixSimulation, RHLab::LEDMatrix::MatrixData, RHLab::LEDMatrix::MatrixRequest>(configuration, mode);
+    } else if (simulation == "computer-fan") {
+        runner = new ConcreteSimulationRunner<RHLab::ComputerFan::ComputerFanSimulation, RHLab::ComputerFan::ComputerFanData, RHLab::ComputerFan::ComputerFanRequest>(configuration, mode);
     } else if (simulation == "watertank") {
         runner = new ConcreteSimulationRunner<WatertankSimulation, WatertankData, WatertankRequest>(configuration, mode);
     } else if (simulation == "butterfly" || simulation == "butterfly-fpga-de1-soc" || simulation == "butterfly-fpga-de2-115") {

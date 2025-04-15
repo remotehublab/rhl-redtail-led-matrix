@@ -17,5 +17,6 @@ add_executable(hybridapi
     src/deusto/watertankDeusto.cpp
     src/rhlab/butterfly.cpp
     src/rhlab/matrix.cpp
+    src/rhlab/computerFan.cpp
 
 )

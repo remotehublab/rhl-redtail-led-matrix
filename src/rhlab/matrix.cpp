@@ -29,6 +29,7 @@ bool MatrixSimulation::readSerialCommunication(vector<vector<bool>>& buffer, vec
         }
     } catch (exception e) {
         // TODO: add some form of exception dump or handling
+        this->log("exception!");
         return false;
     }
     

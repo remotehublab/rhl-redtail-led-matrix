@@ -285,6 +285,8 @@
                     No Serial Communication Protocol
                     {% elif not config['SIMULATION_CONFIG']['serial'].get('dut2sim') %}
                     No Samples For Serial Communication
+                    {% elif not config['SIMULATION_CONFIG']['serial']['dut2sim'].get('samples') %}
+                    No Samples For Serial Communication
                     {% else %}
                     <div class="row-md-6">
                         <!-- File Upload and Sample Buttons -->
