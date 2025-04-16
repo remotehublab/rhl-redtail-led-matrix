@@ -1,0 +1,27 @@
+name: Computer Fan
+description: This is a simulation of a computer and its fan
+
+iframe:
+  url: "computer-fan/computer-fan.html"
+  height: 500
+
+gpios:
+  dut2sim:
+    # FPGA outputs
+    labels: [latch, pulse, rmp]
+  
+  sim2dut:
+    labels: [temperature]
+
+serial:
+  dut2sim:
+    # A serial communication scheme with numbered latch, pulse, inupt channels, and output channels
+    # There must be a "gpios" section to use this!
+    # Define Data
+    latch: 0 # Start sending data
+    pulse: 1 # Output data is valid
+    outputs: [2] # List of GPIO output channels (optional)
+    num_pulses: 12 # The number of pulses per latch
+  
+  sim2dut:
+    inputs: [0] # List of GPIO output channels (optional)
