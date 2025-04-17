@@ -21,7 +21,6 @@ serial:
     latch: 0 # Start sending data
     pulse: 1 # Output data is valid
     outputs: [2] # List of GPIO output channels (optional)
+    inputs: [0] # List of GPIO output channels (optional)
     num_pulses: 12 # The number of pulses per latch
   
-  sim2dut:
-    inputs: [0] # List of GPIO output channels (optional)

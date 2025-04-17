@@ -77,3 +77,17 @@ window.addEventListener("message", (event) => {
         }
     }
 }, false);
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Listen for any change within the #state container
+    document.getElementById('state').addEventListener('change', () => {
+        // find the checked radio and log its value
+        const selected = document.querySelector('input[name="state"]:checked').value;
+        parent.postMessage({
+            messageType: "web2sim",
+            version: "1.0",
+            value: selected
+        }, '*');
+    });
+});

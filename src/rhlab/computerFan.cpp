@@ -114,6 +114,7 @@ void ComputerFanSimulation::update(double delta) {
     bool requestWasRead = readRequest(userRequest);
     if(requestWasRead) {
         this->mState.updateUsage(userRequest.state);
+        this->log() << "Updating state to: " << userRequest.state << endl;
     }
 
     // Cooling effect from fan
@@ -157,7 +158,7 @@ void ComputerFanSimulation::update(double delta) {
         if (rpm > 3000) rpm = 3000;
         
         this->mState.setRPM(rpm);
-        this->log() << "TEMP: " << this->mState.temperature << " RMP: " << this->mState.rpm << endl;
+        this->log() << "TEMP: " << this->mState.temperature << " RPM: " << this->mState.rpm << endl;
         this->log() << "Reporting:" << this->mState.serialize() << endl;
         requestReportState();
     }

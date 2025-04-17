@@ -19,7 +19,7 @@ namespace RHLab::ComputerFan {
     const int OUTPUTS = 3; // Latch, Pulse, and Temperature
     
 
-    // struct that receives the string; NOT USED FOR NOW
+    // information received from the web browser (only the state)
     struct ComputerFanRequest : public BaseInputDataType {
 
         char state = 'I'; // 'I' is idle, 'U' in use and 'L' is under load
@@ -43,7 +43,7 @@ namespace RHLab::ComputerFan {
         }
     };
 
-    // struct that tracks the virtual LED states
+    // information sent to the web browser
     struct ComputerFanData : public BaseOutputDataType {
         double usage;
         double temperature;
@@ -51,7 +51,7 @@ namespace RHLab::ComputerFan {
 
         public:
             ComputerFanData() {
-                usage = 0.0;
+                usage = 50.0;
                 temperature = 20.0;
                 rpm = 600;
             }

@@ -10,7 +10,18 @@
     <div class="container-fluid">
       <div>
         <!-- <img src="static/resources/images/Matrix.png" height="100px" style="float:left;"> -->
-        <p id="protocol"></p><p id="sim2web"></p>
+        <div id="state">
+          <label>
+            <input type="radio" name="state" value="I"> Idle (I)
+          </label>
+          <label>
+            <input type="radio" name="state" value="U"> In Use (U)
+          </label>
+          <label>
+            <input type="radio" name="state" value="L"> Under Load (L)
+          </label>
+        </div>
+        
       </div>
       <script type="module" src="static/computer-fan.js"></script>
     </div>
