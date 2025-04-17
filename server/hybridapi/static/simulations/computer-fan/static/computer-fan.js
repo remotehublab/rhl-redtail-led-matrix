@@ -64,9 +64,13 @@ window.addEventListener("message", (event) => {
     if (event.source !== parent) return;
 
     if (event.data.messageType === "sim2web") {
-        const { temp, rpm } = event.data.value;
+        // expected: "temperature:rpm"
+        // for example, 20:1024 means 20ºC and 1024 rpm
+        const messageParts = event.data.value.split(":");
 
-        if (typeof temp === "number" && typeof rpm === "number") {
+        if (messageParts.length == 2) {
+            const temp = parseInt(messageParts[0]);
+            const rpm = parseInt(messageParts[1]);
             tempValue = temp;
             rpmValue = rpm;
             updateDisplays(temp, rpm);

@@ -8,7 +8,7 @@ iframe:
 gpios:
   dut2sim:
     # FPGA outputs
-    labels: [latch, pulse, rmp]
+    labels: [latch, pulse, rpm]
   
   sim2dut:
     labels: [temperature]
