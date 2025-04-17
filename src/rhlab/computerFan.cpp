@@ -10,7 +10,7 @@ using namespace std;
 using namespace RHLab::ComputerFan;
 
 void ComputerFanSimulation::initialize(){
-    this->targetDevice->initializeSimulation({"latch", "pulse", "temperature"}, {"latch", "pulse", "rpm"});
+    this->targetDevice->initializeSimulation({"temperature"}, {"latch", "pulse", "rpm"});
 
     setReportWhenMarked(true);
 }
@@ -110,15 +110,11 @@ void ComputerFanSimulation::update(double delta) {
     double max_cooling = 25.0;
     double thermal_adjustment_rate = 0.1;
 
-    // Possibly change state
-    if ((rand() % 100) < percent_to_change_state) {
-        int r = rand() % 3;
-        string state = (r == 0) ? "idle" : (r == 1) ? "in_use" : "under_load";
-        this->mState.setState(state);
+    ComputerFanRequest userRequest;
+    bool requestWasRead = readRequest(userRequest);
+    if(requestWasRead) {
+        this->mState.updateUsage(userRequest.state);
     }
-
-    // Random Walk CPU Usage within state
-    this->mState.updateUsage();
 
     // Cooling effect from fan
     double cooling_effect = ((this->mState.rpm - 600.0) / (3000.0 - 600.0)) * max_cooling;

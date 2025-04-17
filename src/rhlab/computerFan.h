@@ -21,42 +21,51 @@ namespace RHLab::ComputerFan {
 
     // struct that receives the string; NOT USED FOR NOW
     struct ComputerFanRequest : public BaseInputDataType {
+
+        char state = 'I'; // 'I' is idle, 'U' in use and 'L' is under load
+
         bool deserialize(std::string const & input) {
+            if (input.size()) {
+                if (input == "I") // idle
+                    state = 'I';
+                else if (input == "U") // in use
+                    state = 'U';
+                else if (input == "L") // under load
+                    state = 'L';
+                else {
+                    // no error management for now
+                    return false;
+                }
+                // If there was any change
+                return true;
+            }
             return false;
         }
     };
 
     // struct that tracks the virtual LED states
     struct ComputerFanData : public BaseOutputDataType {
-        string state;
         double usage;
         double temperature;
         int rpm;
 
         public:
             ComputerFanData() {
-                state = "idle";
                 usage = 0.0;
                 temperature = 20.0;
                 rpm = 600;
             }
 
-            void setState(string state) {
-                if (state == "idle" || state == "in_use" || state == "under_load") {
-                    this->state = state;
-                }
-            }
-
-            void updateUsage() {
+            void updateUsage(char state) {
                 // State usage bounds
                 double low, high;
-                if (this->state == "idle") { 
+                if (state == 'I') { // idle
                     low = 0;
                     high = 20;
-                } else if (this->state == "in_use") {
+                } else if (state == 'U') { // in use
                     low = 30;
                     high = 60;
-                } else {
+                } else { // 'L' (under load)
                     low = 70;
                     high = 100;
                 }
