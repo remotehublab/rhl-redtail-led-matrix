@@ -83,7 +83,7 @@ namespace RHLab::ComputerFan {
                     state = 'L';
                 }
                 // Random walk on usage
-                double delta = (rand() % 1001) / 100.0 - 5.0; // -5 to +5
+                double delta = ((double)rand() / RAND_MAX) * 10.0 - 5.0;
                 this->usage += delta;
                 if (this->usage < low) this->usage = low;
                 if (this->usage > high) this->usage = high;
