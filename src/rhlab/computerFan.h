@@ -11,6 +11,13 @@
 
 using namespace std;
 
+#define MAX_RPM 3000
+#define MAX_WATTS 100.0
+#define MAX_USAGE 100
+#define T_AMBIENT 25.0
+#define dT 0.1
+#define C_TH 10.0
+
 namespace RHLab::ComputerFan {
     const int BITS_PER_TEMP = 8;
     const int BITS_PER_RPM = 12;
@@ -48,12 +55,15 @@ namespace RHLab::ComputerFan {
         double usage;
         double temperature;
         int rpm;
+        char state;
+        
 
         public:
             ComputerFanData() {
-                usage = 50.0;
-                temperature = 20.0;
+                usage = 0.0;
+                temperature = T_AMBIENT;
                 rpm = 600;
+                state = 'I';
             }
 
             void updateUsage(char state) {
@@ -62,12 +72,15 @@ namespace RHLab::ComputerFan {
                 if (state == 'I') { // idle
                     low = 0;
                     high = 20;
+                    state = 'I';
                 } else if (state == 'U') { // in use
                     low = 30;
                     high = 60;
+                    state = 'U';
                 } else { // 'L' (under load)
                     low = 70;
-                    high = 100;
+                    high = MAX_USAGE;
+                    state = 'L';
                 }
                 // Random walk on usage
                 double delta = (rand() % 1001) / 100.0 - 5.0; // -5 to +5

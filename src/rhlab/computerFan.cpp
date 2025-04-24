@@ -106,27 +106,24 @@ void ComputerFanSimulation::printOutput(vector<vector<bool>>& output_buffer, vec
 
 void ComputerFanSimulation::update(double delta) {
 
-    static int percent_to_change_state = 5;
-    double max_cooling = 25.0;
-    double thermal_adjustment_rate = 0.1;
-
     ComputerFanRequest userRequest;
     bool requestWasRead = readRequest(userRequest);
     if(requestWasRead) {
         this->mState.updateUsage(userRequest.state);
-        this->log() << "Updating state to: " << userRequest.state << endl;
+        this->log() << "Updating state to: " << userRequest.state << " U:" << this->mState.usage << " T: " << this->mState.temperature << " RPM:" << this->mState.rpm << endl;
+    } else {
+        this->mState.updateUsage(this->mState.state);
     }
 
-    // Cooling effect from fan
-    double cooling_effect = ((this->mState.rpm - 600.0) / (3000.0 - 600.0)) * max_cooling;
-
-    // Set Temperature
-    double target_temp = this->mState.temperature + (this->mState.usage / 100.0) * 70.0 - cooling_effect;
-    double temp_delta = thermal_adjustment_rate * (target_temp - this->mState.temperature);
-    this->mState.setTemperature(this->mState.temperature + temp_delta);
+    double C = this->mState.rpm / MAX_RPM;
+    double P = this->mState.usage / MAX_USAGE * MAX_WATTS;
+    double dTdt = (P - C * (this->mState.temperature - T_AMBIENT)) / C_TH;
+    double T = this->mState.temperature + (dTdt * dT);
+    this->mState.setTemperature(T);
 
     // If latch is low, there's nothing to process.
     if (this->targetDevice->getGpio("latch") == 0) {
+        requestReportState();
         return;
     }
     
