@@ -146,14 +146,14 @@ void ComputerFanSimulation::update(double delta) {
     if (performSerialCommunication(targetDeviceInputData, inputGPIOs, targetDeviceOutputData, outputGPIOs)) {
         // Fan speed update
         int rpm = 0;
-        for (int i = BITS_PER_RPM; i >= 0; i--) {
+        for (int i = BITS_PER_RPM-1; i >= 0; i--) {
             rpm += targetDeviceInputData[0][i] ? pow(2, i) : 0;
         }
         this->log() << "rpm array size: " << targetDeviceInputData[0].size() << endl;
-        this->log() << " " << rpm << endl;
+        this->log() << "rpm: " << rpm << endl;
         if (rpm < 600) rpm = 600;
         if (rpm > 3000) rpm = 3000;
-        
+
         this->mState.setRPM(rpm);
         this->log() << "TEMP: " << this->mState.temperature << " RPM: " << this->mState.rpm << endl;
         this->log() << "Reporting:" << this->mState.serialize() << endl;
