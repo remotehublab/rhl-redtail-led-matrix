@@ -40,16 +40,16 @@ namespace RHLab::ComputerFan {
     // information received from the web browser (only the state)
     struct ComputerFanRequest : public BaseInputDataType {
 
-        char state = 'I'; // 'I' is idle, 'U' in use and 'L' is under load
+        char state = 'L'; // Low, Medium, & High
 
         bool deserialize(std::string const & input) {
             if (input.size()) {
-                if (input == "I") // idle
-                    state = 'I';
-                else if (input == "U") // in use
-                    state = 'U';
-                else if (input == "L") // under load
+                if (input == "L") // idle
                     state = 'L';
+                else if (input == "M") // in use
+                    state = 'M';
+                else if (input == "H") // under load
+                    state = 'H';
                 else {
                     // no error management for now
                     return false;
@@ -77,10 +77,10 @@ namespace RHLab::ComputerFan {
             }
 
             void reset() {
-                usage = 0.0;
+                usage = USAGE_MIN;
                 temperature = T_AMBIENT;
-                rpm = 600;
-                state = 'I';
+                rpm = RPM_MIN;
+                state = 'L';
                 t_prev = std::chrono::steady_clock::now();
             }
 
@@ -92,12 +92,11 @@ namespace RHLab::ComputerFan {
 
             void updateUsage(char state) {
                 // Shutdown
-                if (this->state == 'S') { return; } 
+                if (this->state == 'S') { return; }
                 
                 // Validate State
                 if (state != 'L' && state != 'M' && state != 'H') {
                     cout << "Invalid State: " << state << endl;
-                } else {
                     state = this->state;
                 }
                 
@@ -105,12 +104,12 @@ namespace RHLab::ComputerFan {
                 double low, high;
                 if (state == 'L') {   // Low Load
                     low = USAGE_MIN;
-                    high = low + 0.25 * (USAGE_MAX - USAGE_MIN);
+                    high = USAGE_MIN + 0.25 * (USAGE_MAX - USAGE_MIN);
                 } else if (state == 'M') {  // Medium Load
-                    low = 0.26 * (USAGE_MAX - USAGE_MIN);
-                    high = 0.60 * (USAGE_MAX - USAGE_MIN);
+                    low = USAGE_MIN + 0.26 * (USAGE_MAX - USAGE_MIN);
+                    high = USAGE_MIN + 0.60 * (USAGE_MAX - USAGE_MIN);
                 } else {                    // 'H' High Load
-                    low = 0.61 * (USAGE_MAX - USAGE_MIN);
+                    low = USAGE_MIN + 0.61 * (USAGE_MAX - USAGE_MIN);
                     high = USAGE_MAX;
                 }
 

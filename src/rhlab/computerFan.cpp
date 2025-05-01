@@ -109,12 +109,13 @@ void ComputerFanSimulation::update(double delta) {
 
     ComputerFanRequest userRequest;
     bool requestWasRead = readRequest(userRequest);
+    this->log() << "Selected State: " << userRequest.state << endl;
     if(requestWasRead) {
         this->mState.updateUsage(userRequest.state);
-        this->log() << "Updating state to: " << userRequest.state << " U:" << this->mState.usage << " T: " << this->mState.temperature << " RPM:" << this->mState.rpm << endl;
     } else {
         this->mState.updateUsage(this->mState.state);
     }
+    this->log() << "Updating CPU: S: " << this->mState.state << " U:" << this->mState.usage << " T: " << this->mState.temperature << " RPM:" << this->mState.rpm << endl;
 
     double C = C_PASSIVE + (double)this->mState.rpm / RPM_MAX;
     double P = this->mState.usage / USAGE_MAX * this->mState.get_power();
