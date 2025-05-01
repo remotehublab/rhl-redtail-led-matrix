@@ -3,6 +3,7 @@
 #include <string.h>
 #include <vector>
 #include <cmath>
+#include <chrono>
 #include "computerFan.h"
 
 
@@ -115,10 +116,15 @@ void ComputerFanSimulation::update(double delta) {
         this->mState.updateUsage(this->mState.state);
     }
 
-    double C = this->mState.rpm / MAX_RPM;
-    double P = this->mState.usage / MAX_USAGE * MAX_WATTS;
+    double C = C_PASSIVE + (double)this->mState.rpm / RPM_MAX;
+    double P = this->mState.usage / USAGE_MAX * this->mState.get_power();
+
+    // dTdt = (Power Ratio - (Cooling Ratio * (T - 25))) / 10
     double dTdt = (P - C * (this->mState.temperature - T_AMBIENT)) / C_TH;
-    double T = this->mState.temperature + (dTdt * dT);
+    double dt = this->mState.get_dt();
+    this->log() << "dt: " << dt << "  |  dT: " << (dTdt * dt) << endl;
+    double T = this->mState.temperature + (dTdt * dt);
+    this->log() << "T in: " << this->mState.temperature << "  |  T out: " << T << endl;
     this->mState.setTemperature(T);
 
     // If latch is low, there's nothing to process.

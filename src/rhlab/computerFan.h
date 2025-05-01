@@ -3,6 +3,7 @@
 #define COMPUTER_FAN_SIMULATION_H
 
 #include "../labsland/simulations/simulation.h"
+#include <chrono>
 #include <string>
 #include <cstring>
 #include <sstream>
@@ -11,12 +12,22 @@
 
 using namespace std;
 
-#define MAX_RPM 3000
-#define MAX_WATTS 100.0
-#define MAX_USAGE 100
-#define T_AMBIENT 25.0
-#define dT 0.1
-#define C_TH 10.0
+#define RPM_MIN 600     // Min RPM Speed
+#define RPM_MAX 3000    // Max RPM Speed
+
+#define WATTS_MAX 100.0     // Watts Peak
+#define WATTS_THROTTLE 70   // Watts when thermal throttling
+
+#define OFF       0     // Off
+#define USAGE_MIN 1     // Min Usage
+#define USAGE_MAX 100   // Max Usage
+
+#define T_AMBIENT 25.0  // Temp of surroundings
+#define T_THROTTLE 90   // Temp to start throttling
+#define T_SHUTDOWN 100  // Temp to shutdown
+
+#define C_PASSIVE 0.2   // Passive Cooling Factor
+#define C_TH 25.0       // Heating Rate (higher=slower)
 
 namespace RHLab::ComputerFan {
     const int BITS_PER_TEMP = 8;
@@ -56,46 +67,97 @@ namespace RHLab::ComputerFan {
         double temperature;
         int rpm;
         char state;
+        chrono::steady_clock::time_point t_prev;
+
         
 
         public:
             ComputerFanData() {
+                reset();
+            }
+
+            void reset() {
                 usage = 0.0;
                 temperature = T_AMBIENT;
                 rpm = 600;
                 state = 'I';
+                t_prev = std::chrono::steady_clock::now();
+            }
+
+            void shutdown() {
+                this->state = 'S';
+                this->usage = OFF;
+                this->rpm = OFF;
             }
 
             void updateUsage(char state) {
-                // State usage bounds
-                double low, high;
-                if (state == 'I') { // idle
-                    low = 0;
-                    high = 20;
-                    state = 'I';
-                } else if (state == 'U') { // in use
-                    low = 30;
-                    high = 60;
-                    state = 'U';
-                } else { // 'L' (under load)
-                    low = 70;
-                    high = MAX_USAGE;
-                    state = 'L';
+                // Shutdown
+                if (this->state == 'S') { return; } 
+                
+                // Validate State
+                if (state != 'L' && state != 'M' && state != 'H') {
+                    cout << "Invalid State: " << state << endl;
+                } else {
+                    state = this->state;
                 }
+                
+                // Set High and Low
+                double low, high;
+                if (state == 'L') {   // Low Load
+                    low = USAGE_MIN;
+                    high = low + 0.25 * (USAGE_MAX - USAGE_MIN);
+                } else if (state == 'M') {  // Medium Load
+                    low = 0.26 * (USAGE_MAX - USAGE_MIN);
+                    high = 0.60 * (USAGE_MAX - USAGE_MIN);
+                } else {                    // 'H' High Load
+                    low = 0.61 * (USAGE_MAX - USAGE_MIN);
+                    high = USAGE_MAX;
+                }
+
+                // New State so set usage to middle
+                if (this->state != state) {
+                    this-> usage = (low + high) / 2;
+                    this->state = state;
+                }
+
                 // Random walk on usage
                 double delta = ((double)rand() / RAND_MAX) * 10.0 - 5.0;
-                this->usage += delta;
+                this->usage += delta / 3;
                 if (this->usage < low) this->usage = low;
                 if (this->usage > high) this->usage = high;
             }
 
-            void setTemperature(int temperature) {
+            void setTemperature(double temperature) {
+                if (temperature > T_SHUTDOWN) {
+                    shutdown();
+                    return;
+                }
                 this->temperature = temperature;
             }
 
             void setRPM(int rpm) {
+                if (state == 'S') { return; }
                 this->rpm = rpm;
             }
+
+            double get_power() {
+                if (state == 'S') { return OFF; }
+                if (this->temperature >= T_THROTTLE) {
+                    return WATTS_THROTTLE;
+                } else {
+                    return WATTS_MAX;
+                }
+            }
+            
+            double get_dt() {
+                chrono::steady_clock::time_point t1 = this->t_prev;
+                chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+                this->t_prev = t2;
+
+                std::chrono::duration<double> dt = t2 - t1;
+                return dt.count();
+            }
+            
 
             string serialize() const {
                 stringstream stream;
