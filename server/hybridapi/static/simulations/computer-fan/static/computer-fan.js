@@ -78,16 +78,23 @@ window.addEventListener("message", (event) => {
     }
 }, false);
 
-document.addEventListener('DOMContentLoaded', function() {
-
-    // Listen for any change within the #state container
-    document.getElementById('state').addEventListener('change', () => {
-        // find the checked radio and log its value
-        const selected = document.querySelector('input[name="state"]:checked').value;
+document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('change', (e) => {
+      if (e.target.name === 'state') {
+        // Radio button from state group changed
         parent.postMessage({
-            messageType: "web2sim",
-            version: "1.0",
-            value: selected
+          messageType: "web2sim",
+          version: "1.0",
+          value: e.target.value
         }, '*');
+      } else if (e.target.id === 'reset') {
+        // Checkbox toggled
+        const value = e.target.checked ? "1" : "0";
+        parent.postMessage({
+          messageType: "web2sim",
+          version: "1.0",
+          value: value
+        }, '*');
+      }
     });
-});
+  });

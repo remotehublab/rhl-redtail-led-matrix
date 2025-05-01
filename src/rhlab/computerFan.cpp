@@ -109,8 +109,12 @@ void ComputerFanSimulation::update(double delta) {
 
     ComputerFanRequest userRequest;
     bool requestWasRead = readRequest(userRequest);
-    this->log() << "Selected State: " << userRequest.state << endl;
     if(requestWasRead) {
+        if (userRequest.reset) {
+            this->mState.reset();
+            requestReportState();
+            return;
+        }
         this->mState.updateUsage(userRequest.state);
     } else {
         this->mState.updateUsage(this->mState.state);
@@ -123,9 +127,9 @@ void ComputerFanSimulation::update(double delta) {
     // dTdt = (Power Ratio - (Cooling Ratio * (T - 25))) / 10
     double dTdt = (P - C * (this->mState.temperature - T_AMBIENT)) / C_TH;
     double dt = this->mState.get_dt();
-    this->log() << "dt: " << dt << "  |  dT: " << (dTdt * dt) << endl;
+    //this->log() << "dt: " << dt << "  |  dT: " << (dTdt * dt) << endl;
     double T = this->mState.temperature + (dTdt * dt);
-    this->log() << "T in: " << this->mState.temperature << "  |  T out: " << T << endl;
+    //this->log() << "T in: " << this->mState.temperature << "  |  T out: " << T << endl;
     this->mState.setTemperature(T);
 
     // If latch is low, there's nothing to process.

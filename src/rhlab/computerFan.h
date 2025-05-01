@@ -41,23 +41,20 @@ namespace RHLab::ComputerFan {
     struct ComputerFanRequest : public BaseInputDataType {
 
         char state = 'L'; // Low, Medium, & High
+        bool reset = 0;   // Not reseting
 
         bool deserialize(std::string const & input) {
-            if (input.size()) {
-                if (input == "L") // idle
-                    state = 'L';
-                else if (input == "M") // in use
-                    state = 'M';
-                else if (input == "H") // under load
-                    state = 'H';
-                else {
-                    // no error management for now
-                    return false;
-                }
-                // If there was any change
+            if (!input.size()) { return false; }
+            if (input == "1") {
+                reset = 1;
+                return true;
+            } else if (input == "0") {
+                // skip
+                return false;
+            } else {
+                state = input[0];
                 return true;
             }
-            return false;
         }
     };
 
