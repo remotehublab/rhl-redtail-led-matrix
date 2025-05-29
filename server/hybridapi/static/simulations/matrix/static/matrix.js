@@ -2,7 +2,7 @@ import kaboom from "https://cdn.jsdelivr.net/npm/kaboom@3000.1.15/dist/kaboom.mj
 
 kaboom({
     width: 360, // Adjust to include border
-    height: 380,
+    height: 450,
     scale: 2,
     background: [0, 0, 0], // Black background
 });
@@ -59,12 +59,12 @@ add([
 let defaultGrid = "B".repeat(GRID_SIZE).concat(":").repeat(GRID_SIZE - 1) + "B".repeat(GRID_SIZE);
 drawGrid(defaultGrid);
 
-// Add instructions
-add([
-    text("Press ENTER to input a new grid", { size: 16 }),
-    pos(10, 340),
-    color([255, 255, 255]),
-]);
+// // Add instructions
+// add([
+//     text("Press ENTER to input a new grid", { size: 16 }),
+//     pos(10, 340),
+//     color([255, 255, 255]),
+// ]);
 
 // Listen for "enter" key press
 onKeyPress("enter", () => {

@@ -3,7 +3,7 @@ import kaboom from "https://cdn.jsdelivr.net/npm/kaboom@3000.1.15/dist/kaboom.mj
 // Initialize kaboom
 kaboom({
     width: 360,
-    height: 160,
+    height: 65,
     scale: 2,
     background: [0, 0, 0], // Black background
 });
@@ -15,26 +15,26 @@ let rpmValue = 0;
 // Display labels and values
 const tempLabel = add([
     text("CPU Temp: ", { size: 16 }),
-    pos(20, 40),
+    pos(20, 15),
     color(255, 255, 255),
 ]);
 
 const tempDisplay = add([
     text(`${tempValue} °C`, { size: 16 }),
-    pos(160, 40),
+    pos(160, 15),
     color(0, 255, 0),
     "temp"
 ]);
 
 const rpmLabel = add([
     text("Fan Speed: ", { size: 16 }),
-    pos(20, 80),
+    pos(20, 40),
     color(255, 255, 255),
 ]);
 
 const rpmDisplay = add([
     text(`${rpmValue} RPM`, { size: 16 }),
-    pos(160, 80),
+    pos(160, 40),
     color(0, 255, 0),
     "rpm"
 ]);
@@ -46,14 +46,14 @@ function updateDisplays(temp, rpm) {
 
     add([
         text(`${temp} °C`, { size: 16 }),
-        pos(160, 40),
+        pos(160, 20),
         color(0, 255, 0),
         "temp"
     ]);
 
     add([
         text(`${rpm} RPM`, { size: 16 }),
-        pos(160, 80),
+        pos(160, 40),
         color(0, 255, 0),
         "rpm"
     ]);

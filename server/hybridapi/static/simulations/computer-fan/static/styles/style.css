@@ -1,0 +1,27 @@
+body {
+  margin: 0;
+  background-color: black;
+  color: black;
+  font-family: sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background-color: black;
+}
+
+#kaboomCanvasContainer canvas {
+  border: 2px solid black;
+  display: block;
+}
+
+#babylonCanvas {
+  width: 400px;
+  height: 300px;
+  border: 2px solid red;
+  display: block;
+}
+

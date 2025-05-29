@@ -3,7 +3,7 @@ description: This is a simulation of a LED Matrix
 
 iframe:
   url: "matrix/matrix.html"
-  height: 500
+  height: 750
 
 gpios:
   dut2sim:

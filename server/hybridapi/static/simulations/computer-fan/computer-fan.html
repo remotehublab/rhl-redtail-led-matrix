@@ -1,35 +1,136 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Computer Fan</title>
-    <script src="https://cdn.jsdelivr.net/npm/kaboom@3000.1.15/dist/kaboom.js"></script>
-  </head>
-  <body>
-    <div class="container-fluid">
-      <div>
-        <!-- <img src="static/resources/images/Matrix.png" height="100px" style="float:left;"> -->
-        <div id="state">
-          <label>
-            <input type="radio" name="state" value="L" checked> Low
-          </label>
-          <label>
-            <input type="radio" name="state" value="M"> Medium
-          </label>
-          <label>
-            <input type="radio" name="state" value="H"> High
-          </label>
-        </div>
+<head>
+  <meta charset="utf-8" />
+  <title>Computer-fan simulation</title>
 
-        <div id="reset">
-          <label>
-            <input type="checkbox" id="reset"> Reset
-          </label>
-        </div>
-        
-      </div>
-      <script type="module" src="static/computer-fan.js"></script>
+  <!-- Babylon UMD bundles (no bundler/import-map needed) -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+
+  <style>
+    /* ---------- general look ---------- */
+    :root{
+      --bg-dark:#000;          /* overall background                */
+      --fg-light:#fff;         /* text on dark                      */
+      --fg-mid:#aaa;
+      --accent:#0a84ff;        /* blue accent for selected buttons  */
+    }
+
+    body{
+      margin:0;
+      background:var(--bg-dark);
+      color:var(--fg-light);
+      font-family:sans-serif;
+    }
+
+    /* ---------- wrapper column ---------- */
+    .sim-wrapper{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:1rem;
+      padding:.75rem;
+    }
+
+    /* ---------- pill-buttons controls ---------- */
+    .controls{
+      display:flex;
+      gap:1rem;
+      flex-wrap:wrap;
+      font-size:1rem;
+      user-select:none;
+    }
+
+    /* hide the native inputs */
+    .controls input{
+      position:absolute;
+      appearance:none;
+      pointer-events:none;     /* clicks land on the label instead */
+    }
+
+    /* pretty pills */
+    .btn{
+      display:inline-block;
+      padding:.35em 1.1em;
+      border:2px solid #555;
+      border-radius:9999px;
+      background:#222;
+      color:var(--fg-mid);
+      font-weight:600;
+      cursor:pointer;
+      transition:
+        background .15s ease,
+        color      .15s ease,
+        border     .15s ease,
+        transform  .10s ease;
+    }
+    /* hover / keyboard focus */
+    .controls input:focus-visible + .btn,
+    .btn:hover{
+      border-color:#888;
+      color:var(--fg-light);
+    }
+    /* pressed */
+    .controls input:active + .btn{ transform:scale(.94); }
+
+    /* selected state (checked radio / checkbox) */
+    .controls input:checked + .btn{
+      background:var(--accent);
+      border-color:var(--accent);
+      color:#fff;
+    }
+
+    /* ---------- canvases ---------- */
+    #kaboomCanvasContainer canvas,
+    #babylonCanvas{
+      width:100%;
+      max-width:100%;
+      display:block;
+      border:2px solid #444;
+    }
+    #babylonCanvas{
+      height:300px;            /* adjust to taste */
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sim-wrapper">
+
+    <!-- 1️⃣  Controls -->
+    <div class="controls">
+      <label>
+        <input type="radio" name="state" value="L" checked />
+        <span class="btn">Low</span>
+      </label>
+
+      <label>
+        <input type="radio" name="state" value="M" />
+        <span class="btn">Medium</span>
+      </label>
+
+      <label>
+        <input type="radio" name="state" value="H" />
+        <span class="btn">High</span>
+      </label>
+
+      <label style="margin-left:1rem">
+        <input type="checkbox" id="reset" />
+        <span class="btn">Reset</span>
+      </label>
     </div>
-  </body>
+
+    <!-- 2️⃣  Kaboom canvas (inserted by computer-fan.js) -->
+    <div id="kaboomCanvasContainer"></div>
+
+    <!-- 3️⃣  Babylon canvas -->
+    <canvas id="babylonCanvas"></canvas>
+
+  </div>
+
+  <!-- your application modules (run AFTER the DOM exists) -->
+  <script type="module" src="static/computer-fan.js"></script>
+  <script type="module" src="static/computer-3d.js"></script>
+</body>
 </html>
