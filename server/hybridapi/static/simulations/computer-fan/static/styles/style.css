@@ -1,27 +1,38 @@
-body {
-  margin: 0;
-  background-color: black;
-  color: black;
-  font-family: sans-serif;
+body{
+  /* already dark, but new typeface makes a big difference */
+  font-family:'Inter',system-ui,sans-serif;
 }
 
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  background-color: black;
+/* give the Kaboom canvas the same rounded-card look */
+#kaboomCanvasContainer canvas{
+  border:none;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.35);
+  overflow:hidden;
 }
 
-#kaboomCanvasContainer canvas {
-  border: 2px solid black;
-  display: block;
+
+#babylonCanvas{
+  border:none;                      /* remove hard border  */
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.35);
+  overflow:hidden;                  /* rounds the content  */
 }
 
-#babylonCanvas {
-  width: 400px;
-  height: 300px;
-  border: 2px solid red;
-  display: block;
+.btn{
+  background:linear-gradient(145deg,#2a2a2a,#181818);
+  border:2px solid #444;
+  color:#cfcfcf;
 }
-
+.controls input:checked + .btn{
+  background:linear-gradient(145deg,#0d8bff,#0064ff);
+  border-color:#0d8bff;
+}
+/* glossy top-edge */
+.btn::before{
+  content:"";
+  position:absolute; inset:0;
+  border-radius:inherit;
+  background:linear-gradient( to bottom, rgba(255,255,255,.15), transparent 35%);
+  pointer-events:none;
+}

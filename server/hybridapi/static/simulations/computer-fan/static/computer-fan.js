@@ -1,100 +1,86 @@
-import kaboom from "https://cdn.jsdelivr.net/npm/kaboom@3000.1.15/dist/kaboom.mjs";
+/* ------------ static/computer-fan.js ---------------- */
+import kaboom from
+  "https://cdn.jsdelivr.net/npm/kaboom@3000.1.15/dist/kaboom.mjs";
 
-// Initialize kaboom
+/* Mount inside the div so the canvas never hides your buttons */
 kaboom({
-    width: 360,
-    height: 65,
-    scale: 2,
-    background: [0, 0, 0], // Black background
+  width: 640,
+  height: 40,
+  background: [15, 15, 25],
+  root: document.getElementById("kaboomCanvasContainer"),
+
+  stretch: true,      // let the canvas grow with its container
+  letterbox: true,    // letterbox the canvas to fit the container
 });
 
-// Default values
-let tempValue = 0;
-let rpmValue = 0;
+/* ---------- colours ---------- */
+const GREEN  = rgb(0, 252, 0);
+const YELLOW = rgb(255, 215, 0);
+const RED    = rgb(255, 60, 60);
+const LABEL  = rgb(190, 190, 190);
 
-// Display labels and values
-const tempLabel = add([
-    text("CPU Temp: ", { size: 16 }),
-    pos(20, 15),
-    color(255, 255, 255),
-]);
+/* ---------- live values ---------- */
+let temp = 20;
+let rpm  = 600;
 
-const tempDisplay = add([
-    text(`${tempValue} °C`, { size: 16 }),
-    pos(160, 15),
-    color(0, 255, 0),
-    "temp"
-]);
+const colourFor = (t) => (t < 70 ? GREEN : t < 90 ? YELLOW : RED);
 
-const rpmLabel = add([
-    text("Fan Speed: ", { size: 16 }),
-    pos(20, 40),
-    color(255, 255, 255),
-]);
+/* ---------- layout ---------- */
+const Y     = 20;   // vertical centre
+const GAP   = 18;   // space between sections
 
-const rpmDisplay = add([
-    text(`${rpmValue} RPM`, { size: 16 }),
-    pos(160, 40),
-    color(0, 255, 0),
-    "rpm"
-]);
+const cpuLabel = add([ text("CPU", { size: 20 }), pos(20, Y), color(LABEL), anchor("left") ]);
+const cpuVal   = add([ text("",    { size: 20 }), pos(0,  Y), color(GREEN), anchor("left") ]);
 
-// Function to update text
-function updateDisplays(temp, rpm) {
-    destroyAll("temp");
-    destroyAll("rpm");
+const divider  = add([ text("",   { size: 20 }), pos(0,  Y), color(LABEL), anchor("left") ]);
 
-    add([
-        text(`${temp} °C`, { size: 16 }),
-        pos(160, 20),
-        color(0, 255, 0),
-        "temp"
-    ]);
+const fanLabel = add([ text("FAN", { size: 20 }), pos(0,  Y), color(LABEL), anchor("left") ]);
+const fanVal   = add([ text("",    { size: 20 }), pos(0,  Y), color(GREEN), anchor("left") ]);
 
-    add([
-        text(`${rpm} RPM`, { size: 16 }),
-        pos(160, 40),
-        color(0, 255, 0),
-        "rpm"
-    ]);
+/* position-refresh helper */
+function layout() {
+  cpuVal.pos.x   = cpuLabel.pos.x + cpuLabel.width + 8;
+  divider.pos.x  = cpuVal.pos.x   + cpuVal.width   + GAP;
+  fanLabel.pos.x = divider.pos.x  + divider.width  + GAP;
+  fanVal.pos.x   = fanLabel.pos.x + fanLabel.width + 8;
 }
 
-// Listen for messages from parent
-window.addEventListener("message", (event) => {
-    if (event.source !== parent) return;
+/* redraw numbers & colours */
+function redraw() {
+  cpuVal.text = `${temp} °C`;
+  fanVal.text = `${rpm} RPM`;
 
-    if (event.data.messageType === "sim2web") {
-        // expected: "temperature:rpm"
-        // for example, 20:1024 means 20ºC and 1024 rpm
-        const messageParts = event.data.value.split(":");
+  const c = colourFor(temp);
+  cpuVal.color = c;
+  fanVal.color = LABEL;
 
-        if (messageParts.length == 2) {
-            const temp = parseInt(messageParts[0]);
-            const rpm = parseInt(messageParts[1]);
-            tempValue = temp;
-            rpmValue = rpm;
-            updateDisplays(temp, rpm);
-        }
-    }
+  layout();
+}
+
+/* expose setters for outer page */
+export const setTemp = (n) => { temp = n; redraw(); };
+export const setRPM  = (n) => { rpm  = n; redraw(); };
+
+/* initial draw */
+redraw();
+
+/* ---------- receive updates from simulator ---------- */
+window.addEventListener("message", (ev) => {
+  if (ev.source !== parent || ev.data.messageType !== "sim2web") return;
+
+  const [tStr, rStr] = ev.data.value.split(":");
+  const t = parseInt(tStr, 10);
+  const r = parseInt(rStr, 10);
+  if (!isNaN(t) && !isNaN(r)) {
+    temp = t; rpm = r; redraw();
+  }
 }, false);
 
-document.addEventListener('DOMContentLoaded', function () {
-    document.addEventListener('change', (e) => {
-      if (e.target.name === 'state') {
-        // Radio button from state group changed
-        parent.postMessage({
-          messageType: "web2sim",
-          version: "1.0",
-          value: e.target.value
-        }, '*');
-      } else if (e.target.id === 'reset') {
-        // Checkbox toggled
-        const value = e.target.checked ? "1" : "0";
-        parent.postMessage({
-          messageType: "web2sim",
-          version: "1.0",
-          value: value
-        }, '*');
-      }
-    });
-  });
+/* ---------- send user input back ---------- */
+document.addEventListener("change", (e) => {
+  if (e.target.name === "state") {
+    parent.postMessage({ messageType:"web2sim", version:"1.0", value:e.target.value }, "*");
+  } else if (e.target.id === "reset") {
+    parent.postMessage({ messageType:"web2sim", version:"1.0", value:e.target.checked?"1":"0" }, "*");
+  }
+});

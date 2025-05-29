@@ -1,135 +1,140 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8"/>
   <title>Computer-fan simulation</title>
 
-  <!-- Babylon UMD bundles (no bundler/import-map needed) -->
+  <!-- Inter font for the whole page (not used by Kaboom text) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+
+  <!-- Babylon bundles (UMD, no build step needed) -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 
   <style>
-    /* ---------- general look ---------- */
-    :root{
-      --bg-dark:#000;          /* overall background                */
-      --fg-light:#fff;         /* text on dark                      */
-      --fg-mid:#aaa;
-      --accent:#0a84ff;        /* blue accent for selected buttons  */
-    }
+  /* ---------- base look ---------- */
+  :root{
+    --bg-dark:   #000;
+    --fg-light:  #fff;
+    --fg-mid:    #aaa;
+    --accent:    #0a84ff;
+  }
 
-    body{
-      margin:0;
-      background:var(--bg-dark);
-      color:var(--fg-light);
-      font-family:sans-serif;
-    }
+  html,body{
+    margin:0;
+    background:var(--bg-dark);
+    color:var(--fg-light);
+    font-family:'Inter',system-ui,sans-serif;
+  }
 
-    /* ---------- wrapper column ---------- */
-    .sim-wrapper{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:1rem;
-      padding:.75rem;
-    }
+  /* ---------- layout column ---------- */
+  .sim-wrapper{
+    display:flex;
+    flex-direction:column;
+    gap:1rem;
+    padding:.75rem;
+  }
 
-    /* ---------- pill-buttons controls ---------- */
-    .controls{
-      display:flex;
-      gap:1rem;
-      flex-wrap:wrap;
-      font-size:1rem;
-      user-select:none;
-    }
+  /* ---------- pill-button group ---------- */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:1rem;
+    user-select:none;
+  }
 
-    /* hide the native inputs */
-    .controls input{
-      position:absolute;
-      appearance:none;
-      pointer-events:none;     /* clicks land on the label instead */
-    }
+  /* hide the native radios / checkbox */
+  .controls input{
+    position:absolute;
+    appearance:none;
+    pointer-events:none;
+  }
 
-    /* pretty pills */
-    .btn{
-      display:inline-block;
-      padding:.35em 1.1em;
-      border:2px solid #555;
-      border-radius:9999px;
-      background:#222;
-      color:var(--fg-mid);
-      font-weight:600;
-      cursor:pointer;
-      transition:
-        background .15s ease,
-        color      .15s ease,
-        border     .15s ease,
-        transform  .10s ease;
-    }
-    /* hover / keyboard focus */
-    .controls input:focus-visible + .btn,
-    .btn:hover{
-      border-color:#888;
-      color:var(--fg-light);
-    }
-    /* pressed */
-    .controls input:active + .btn{ transform:scale(.94); }
+  /* fancy pill */
+  .btn{
+    position:relative;               /* for ::before sheen */
+    display:inline-block;
+    padding:.35em 1.1em;
+    border:2px solid #302a57;
+    border-radius:9999px;
+    background:linear-gradient(145deg,#302a57,#1d1b28);
+    color:#cfcfcf;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s,color .15s,border .15s,transform .10s;
+  }
+  /* glossy top-edge */
+  .btn::before{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:inherit;
+    background:linear-gradient(to bottom,rgba(255,255,255,.15),transparent 35%);
+    pointer-events:none;
+  }
+  /* hover / focus */
+  .controls input:focus-visible + .btn,
+  .btn:hover{
+    border-color:#888;
+    color:var(--fg-light);
+  }
+  /* pressed */
+  .controls input:active + .btn{ transform:scale(.94); }
+  /* selected */
+  .controls input:checked + .btn{
+    background:linear-gradient(145deg,#670e79,#302a57);
+    border-color:#302a57;
+    color:#fff;
+  }
 
-    /* selected state (checked radio / checkbox) */
-    .controls input:checked + .btn{
-      background:var(--accent);
-      border-color:var(--accent);
-      color:#fff;
-    }
-
-    /* ---------- canvases ---------- */
-    #kaboomCanvasContainer canvas,
-    #babylonCanvas{
-      width:100%;
-      max-width:100%;
-      display:block;
-      border:2px solid #444;
-    }
-    #babylonCanvas{
-      height:300px;            /* adjust to taste */
-    }
+  /* ---------- “card” canvases ---------- */
+  #kaboomCanvasContainer canvas,
+  #babylonCanvas{
+    width:100%;
+    max-width:100%;
+    border:none;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.35);
+    display:block;
+  }
+  #babylonCanvas{ height:300px; }
   </style>
 </head>
 
 <body>
   <div class="sim-wrapper">
 
-    <!-- 1️⃣  Controls -->
+    <!-- 1️⃣ Controls -->
     <div class="controls">
       <label>
-        <input type="radio" name="state" value="L" checked />
+        <input type="radio" name="state" value="L" checked>
         <span class="btn">Low</span>
       </label>
 
       <label>
-        <input type="radio" name="state" value="M" />
+        <input type="radio" name="state" value="M">
         <span class="btn">Medium</span>
       </label>
 
       <label>
-        <input type="radio" name="state" value="H" />
+        <input type="radio" name="state" value="H">
         <span class="btn">High</span>
       </label>
 
       <label style="margin-left:1rem">
-        <input type="checkbox" id="reset" />
+        <input type="checkbox" id="reset">
         <span class="btn">Reset</span>
       </label>
     </div>
 
-    <!-- 2️⃣  Kaboom canvas (inserted by computer-fan.js) -->
+    <!-- 2️⃣ Kaboom canvas -->
     <div id="kaboomCanvasContainer"></div>
 
-    <!-- 3️⃣  Babylon canvas -->
+    <!-- 3️⃣ Babylon canvas -->
     <canvas id="babylonCanvas"></canvas>
-
   </div>
 
-  <!-- your application modules (run AFTER the DOM exists) -->
+  <!-- app modules (DOM is ready now) -->
   <script type="module" src="static/computer-fan.js"></script>
   <script type="module" src="static/computer-3d.js"></script>
 </body>
