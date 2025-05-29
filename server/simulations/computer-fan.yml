@@ -3,7 +3,7 @@ description: This is a simulation of a computer and its fan
 
 iframe:
   url: "computer-fan/computer-fan.html"
-  height: 500
+  height: 550
 
 gpios:
   dut2sim:
