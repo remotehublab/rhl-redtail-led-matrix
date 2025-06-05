@@ -84,9 +84,19 @@ struct BaseInputDataType {
     }
 };
 
+class HasLog {
+    public:
+        virtual void log(std::string message) = 0;
+
+        /*
+        * Get an ostream to log to
+        */
+        virtual std::ostream& log() = 0;
+};
+
 
 template <class OutputDataType, class InputDataType>
-class Simulation
+class Simulation : HasLog
 {
     static_assert(std::is_base_of<BaseOutputDataType, OutputDataType>::value, "OutputDataType must inherit from BaseOutputDataType");
     static_assert(std::is_base_of<BaseInputDataType, InputDataType>::value, "InputDataType must inherit from BaseInputDataType");

@@ -3,6 +3,8 @@
 #define COMPUTER_FAN_SIMULATION_H
 
 #include "../labsland/simulations/simulation.h"
+#include "../labsland/simulations/utils/serial.h"
+
 #include <chrono>
 #include <string>
 #include <cstring>
@@ -163,17 +165,18 @@ namespace RHLab::ComputerFan {
     };
 
     class ComputerFanSimulation : public Simulation<ComputerFanData, ComputerFanRequest> {
+        private:
+            std::shared_ptr<LabsLand::Simulations::Utils::SerialCommunicator<1, 1>> communicator = nullptr;
+            // Input GPIO data and channel names
+            array<bitset<BITS_PER_RPM>, 1> targetDeviceInputData;
+            
+            // Output GPIO data and channel names
+            array<bitset<BITS_PER_TEMP>, 1> targetDeviceOutputData;
+
         public:
             ComputerFanSimulation() = default;
-            void update(double delta) override;
-            bool performSerialCommunication(
-                vector<vector<bool>>& input_buffer, 
-                vector<string>& input_gpios,
-                vector<vector<bool>>& output_buffer,
-                vector<string>& output_gpios);
             void initialize() override;
-            void printInput(vector<vector<bool>>& input_buffer, vector<string>& input_gpios);
-            void printOutput(vector<vector<bool>>& output_buffer, vector<string>& output_gpios);
+            void update(double delta) override;
     };
 }
 
