@@ -4,8 +4,8 @@ import kaboom from
 
 /* Mount inside the div so the canvas never hides your buttons */
 kaboom({
-  width: 640,
-  height: 40,
+  width: 1200,
+  height: 150,
   background: [15, 15, 25],
   root: document.getElementById("kaboomCanvasContainer"),
 
@@ -26,16 +26,16 @@ let rpm  = 600;
 const colourFor = (t) => (t < 70 ? GREEN : t < 90 ? YELLOW : RED);
 
 /* ---------- layout ---------- */
-const Y     = 20;   // vertical centre
-const GAP   = 18;   // space between sections
+const Y     = 60;   // vertical centre
+const GAP   = 60;   // space between sections
 
-const cpuLabel = add([ text("CPU", { size: 20 }), pos(20, Y), color(LABEL), anchor("left") ]);
-const cpuVal   = add([ text("",    { size: 20 }), pos(0,  Y), color(GREEN), anchor("left") ]);
+const cpuLabel = add([ text("CPU ", { size: 80 }), pos(20, Y), color(LABEL), anchor("left") ]);
+const cpuVal   = add([ text("",    { size: 80 }), pos(0,  Y), color(GREEN), anchor("left") ]);
 
-const divider  = add([ text("",   { size: 20 }), pos(0,  Y), color(LABEL), anchor("left") ]);
+const divider  = add([ text("",   { size: 80 }), pos(0,  Y), color(LABEL), anchor("left") ]);
 
-const fanLabel = add([ text("FAN", { size: 20 }), pos(0,  Y), color(LABEL), anchor("left") ]);
-const fanVal   = add([ text("",    { size: 20 }), pos(0,  Y), color(GREEN), anchor("left") ]);
+const fanLabel = add([ text("FAN ", { size: 80 }), pos(0,  Y), color(LABEL), anchor("left") ]);
+const fanVal   = add([ text("",    { size: 80 }), pos(0,  Y), color(GREEN), anchor("left") ]);
 
 /* position-refresh helper */
 function layout() {

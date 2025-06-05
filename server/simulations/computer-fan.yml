@@ -23,4 +23,17 @@ serial:
     outputs: [2] # List of GPIO output channels (optional)
     inputs: [0] # List of GPIO output channels (optional)
     num_pulses: 12 # The number of pulses per latch
-  
+
+    sample_input:
+      url: computer-fan/
+      samples:
+        600: 
+          file: 600.txt
+          name: "600"
+        1800: 
+          file: 1800.txt
+          name: "1800"
+        3000: 
+          file: 3000.txt
+          name: "3000"
+ 
