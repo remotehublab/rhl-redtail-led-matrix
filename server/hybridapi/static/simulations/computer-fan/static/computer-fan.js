@@ -67,7 +67,7 @@ redraw();
 /* ---------- receive updates from simulator ---------- */
 window.addEventListener("message", (ev) => {
   if (ev.source !== parent || ev.data.messageType !== "sim2web") return;
-
+  console.log("Received sim2web message:", ev.data);
   const [tStr, rStr] = ev.data.value.split(":");
   const t = parseInt(tStr, 10);
   const r = parseInt(rStr, 10);

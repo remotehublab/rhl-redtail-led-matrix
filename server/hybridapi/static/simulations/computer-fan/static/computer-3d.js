@@ -5,7 +5,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const canvas  = document.getElementById("babylonCanvas");
   const engine  = new BABYLON.Engine(canvas, true);
   const scene   = new BABYLON.Scene(engine);
-  scene.debugLayer.show({ embedMode: true });
 
   /* camera & light */
   const cam = new BABYLON.ArcRotateCamera(
@@ -35,6 +34,19 @@ window.addEventListener("DOMContentLoaded", () => {
     "FAN.001_Cylinder.033",
     "FAN.002_Cylinder.034",
     "FAN_Cylinder.012",
+  ];
+
+  const HIDDEN_NODE_NAMES = [
+    "AIO-USB-Plug_Cube.004",
+    "BezierCurve.005_BezierCurve.032",
+    "BezierCurve.006_BezierCurve.033",
+    "Brecked_TR4_Cylinder.003",
+    "Fan-Plug_Cube.006",
+    "RGB-Plug_Cube.115",
+    "Text-AM4_Text",
+    "Text.TR4_Text.001",
+    "USB_cableBezierCurve.006_BezierCurve.034",
+    "USB_Plug_09_asus_rog_ryujin_240.001",
   ];
 
   /* after load we’ll store { node, axis } objects here */
@@ -73,11 +85,20 @@ window.addEventListener("DOMContentLoaded", () => {
         fans.push({ node, axisWorld });
 
         if (fans.length) {
-  cam.setTarget(fans[0].node
-                  .getBoundingInfo()
-                  .boundingSphere
-                  .centerWorld);
-}
+          cam.setTarget(fans[0].node
+                          .getBoundingInfo()
+                          .boundingSphere
+                          .centerWorld);
+        }
+
+        HIDDEN_NODE_NAMES.forEach(name => {
+          const n = scene.getNodeByName(name);
+          if (n) {
+            n.setEnabled(false);     // disables the mesh (and any children) completely
+          } else {
+            console.warn(`⚠️  ${name} not found`);
+          }
+        });
       });
 
       if (fans.length === 0) console.warn("No fan meshes registered.");

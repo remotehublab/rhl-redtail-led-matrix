@@ -8,103 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
 
+  <!-- Site-wide styles -->
+  <link rel="stylesheet" href="static/styles/style.css">
+
   <!-- Babylon bundles (UMD, no build step needed) -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 
-  <!-- new ➜ -->
-  <script src="https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
-
+  <!-- module(s) that don’t depend on DOM elements -->
   <script type="module" src="static/computer-3d.js"></script>
-
-
-  <style>
-  /* ---------- base look ---------- */
-  :root{
-    --bg-dark:   #000;
-    --fg-light:  #fff;
-    --fg-mid:    #aaa;
-    --accent:    #670e79;
-  }
-
-  html,body{
-    margin:0;
-    background:var(--bg-dark);
-    color:var(--fg-light);
-    font-family:'Inter',system-ui,sans-serif;
-  }
-
-  /* ---------- layout column ---------- */
-  .sim-wrapper{
-    display:flex;
-    flex-direction:column;
-    gap:1rem;
-    padding:.75rem;
-  }
-
-  /* ---------- pill-button group ---------- */
-  .controls{
-    display:flex;
-    flex-wrap:wrap;
-    gap:1rem;
-    user-select:none;
-  }
-
-  /* hide the native radios / checkbox */
-  .controls input{
-    position:absolute;
-    appearance:none;
-    pointer-events:none;
-  }
-
-  /* fancy pill */
-  .btn{
-    position:relative;               /* for ::before sheen */
-    display:inline-block;
-    padding:.35em 1.1em;
-    border:2px solid #302a57;
-    border-radius:9999px;
-    background:linear-gradient(145deg,#302a57,#1d1b28);
-    color:#cfcfcf;
-    font-weight:600;
-    cursor:pointer;
-    transition:background .15s,color .15s,border .15s,transform .10s;
-  }
-  /* glossy top-edge */
-  .btn::before{
-    content:"";
-    position:absolute; inset:0;
-    border-radius:inherit;
-    background:linear-gradient(to bottom,rgba(255,255,255,.15),transparent 35%);
-    pointer-events:none;
-  }
-  /* hover / focus */
-  .controls input:focus-visible + .btn,
-  .btn:hover{
-    border-color:#888;
-    color:var(--fg-light);
-  }
-  /* pressed */
-  .controls input:active + .btn{ transform:scale(.94); }
-  /* selected */
-  .controls input:checked + .btn{
-    background:linear-gradient(145deg,#670e79,#302a57);
-    border-color:#302a57;
-    color:#fff;
-  }
-
-  /* ---------- “card” canvases ---------- */
-  #kaboomCanvasContainer canvas,
-  #babylonCanvas{
-    width:100%;
-    max-width:100%;
-    border:none;
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,.35);
-    display:block;
-  }
-  #babylonCanvas{ height:300px; }
-  </style>
 </head>
 
 <body>
@@ -140,7 +52,7 @@
     <canvas id="babylonCanvas"></canvas>
   </div>
 
-  <!-- app modules (DOM is ready now) -->
+  <!-- DOM-dependent modules -->
   <script type="module" src="static/computer-fan.js"></script>
   <script type="module" src="static/computer-3d.js"></script>
 </body>
