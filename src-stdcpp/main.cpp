@@ -12,6 +12,7 @@
 #include "rhlab/butterfly.h"
 #include "rhlab/matrix.h"
 #include "rhlab/computerFan.h"
+#include "rhlab/morse.h"
 #include "deusto/door.h"
 #include "deusto/watertankDeusto.h"
 #include "labsland/simulations/utils/communicatorfiles.h"
@@ -118,7 +119,10 @@ int main(int argc, char * argv[]) {
         runner = new ConcreteSimulationRunner<DoorSimulation, DoorData, DoorRequest>(configuration, mode);
     } else if (simulation == "watertankDeusto") {
         runner = new ConcreteSimulationRunner<WatertankDeustoSimulation, WatertankDeustoData, WatertankDeustoRequest>(configuration, mode);
-    }else {
+    } else if (simulation == "morse") {
+        runner = new ConcreteSimulationRunner< RHLab::Morse::MorseSimulation, RHLab::Morse::MorseData, RHLab::Morse::MorseRequest>(configuration, mode);
+    }
+    else {
         cerr << "Invalid simulation: '" << simulation << "'. Use a valid name" << endl;
         return 2;
     }
