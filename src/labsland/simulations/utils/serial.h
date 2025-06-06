@@ -14,11 +14,13 @@
 #include <bitset>
 #include <array>
 #include <string>
+#include <memory>
 #include "../simulation.h"
 
 namespace LabsLand::Simulations::Utils {
+    extern const char DEFAULT_PULSE_NAME [];
 
-    template <size_t N_INPUTS, size_t N_OUTPUTS>
+    template <size_t N_INPUTS, size_t N_OUTPUTS, const char * PULSE_NAME = DEFAULT_PULSE_NAME>
     class SerialCommunicator {
         private:
             std::shared_ptr<LabsLand::Utils::TargetDevice> targetDevice = nullptr;
@@ -67,7 +69,7 @@ namespace LabsLand::Simulations::Utils {
                     
                     for (int pulse = static_cast<int>(MAX_PULSES)-1; pulse >= 0; pulse--) {
                         // Wait for a rising edge on the pulse GPIO
-                        while (this->targetDevice->getGpio("pulse") == 0) {}
+                        while (this->targetDevice->getGpio(PULSE_NAME) == 0) {}
 
                         this->log("begining pulse");
 
@@ -89,7 +91,7 @@ namespace LabsLand::Simulations::Utils {
                         }
                             
                         // Wait for the pulse to go low again before reading the next bit
-                        while (this->targetDevice->getGpio("pulse") == 1) {}
+                        while (this->targetDevice->getGpio(PULSE_NAME) == 1) {}
                     }
                     printInput<IN_PULSES>(input_buffer);
                     printOutput<OUT_PULSES>(output_buffer);
@@ -123,6 +125,173 @@ namespace LabsLand::Simulations::Utils {
             }
     };
 
+    template <size_t N_OUTPUTS, const char * PULSE_NAME = DEFAULT_PULSE_NAME>
+    class OutputSerialCommunicator {
+        private:
+            std::shared_ptr<SerialCommunicator<0, N_OUTPUTS, PULSE_NAME>> communicator;
+            std::array<std::bitset<0>, 0>& input_buffer;
+
+        public:
+            OutputSerialCommunicator(
+                std::shared_ptr<LabsLand::Utils::TargetDevice> targetDevice, 
+                const std::array<std::string, N_OUTPUTS> output_gpios
+            ) {
+                std::array<std::string, 0> input_gpios;
+                this->communicator = std::make_shared<SerialCommunicator<0, N_OUTPUTS, PULSE_NAME>>(targetDevice, input_gpios, output_gpios);
+            }
+
+            template <size_t OUT_PULSES>
+            bool sendSerialData(
+                const std::array<std::bitset<OUT_PULSES>, N_OUTPUTS>& output_buffer
+            ) {
+                return this->communicator->performSerialCommunication<0, N_OUTPUTS>(input_buffer, output_buffer);
+            }
+    };
+
+    template <size_t N_INPUTS, const char * PULSE_NAME = DEFAULT_PULSE_NAME>
+    class InputSerialCommunicator {
+        private:
+            std::shared_ptr<SerialCommunicator<N_INPUTS, 0, PULSE_NAME>> communicator;
+            const std::array<std::bitset<0>, 0> output_buffer;
+
+        public:
+            InputSerialCommunicator(
+                std::shared_ptr<LabsLand::Utils::TargetDevice> targetDevice, 
+                const std::array<std::string, N_INPUTS> input_gpios
+            ) {
+                std::array<std::string, 0> output_gpios;
+                this->communicator = std::make_shared<SerialCommunicator<N_INPUTS, 0, PULSE_NAME>>(targetDevice, input_gpios, output_gpios);
+            }
+
+            template <size_t IN_PULSES>
+            bool receiveSerialData(
+                std::array<std::bitset<IN_PULSES>, N_INPUTS>& input_buffer
+            ) {
+                return this->communicator->performSerialCommunication<N_INPUTS, 0>(input_buffer, this->output_buffer);
+            }
+    };
+
+    template <const char* PULSE_NAME = DEFAULT_PULSE_NAME>
+    class SingleSerialCommunicator {
+        private:
+            std::shared_ptr<SerialCommunicator<1, 1, PULSE_NAME>> communicator;
+
+        public:
+            SingleSerialCommunicator(
+                std::shared_ptr<LabsLand::Utils::TargetDevice> targetDevice, 
+                const std::string inputGpioName,
+                const std::string outputGpioName
+            ) {
+                const std::array<std::string, 1> input_gpios({inputGpioName});
+                const std::array<std::string, 1> output_gpios({outputGpioName});
+                this->communicator = std::make_shared<SerialCommunicator<1, 1, PULSE_NAME>>(targetDevice, input_gpios, output_gpios);
+            }
+
+            template <size_t IN_PULSES, size_t OUT_PULSES>
+            bool performSerialCommunication(
+                std::array<std::bitset<IN_PULSES>, 1>& input_buffer, 
+                const std::bitset<OUT_PULSES>& output_buffer
+            ) {
+                const std::array<std::bitset<OUT_PULSES>, 1> realOutputBuffer({ output_buffer });
+                return this->communicator->performSerialCommunication<IN_PULSES, OUT_PULSES>(input_buffer, realOutputBuffer);
+            }
+
+            template <size_t IN_PULSES, size_t OUT_PULSES>
+            bool performSerialCommunication(
+                std::bitset<IN_PULSES> & input_buffer, 
+                const std::bitset<OUT_PULSES>& output_buffer
+            ) {
+                std::array<std::bitset<IN_PULSES>, 1> temporaryInputBuffer;
+                const std::array<std::bitset<OUT_PULSES>, 1> realOutputBuffer({ output_buffer });
+                bool result = this->communicator->template 
+                    performSerialCommunication<IN_PULSES, OUT_PULSES>(temporaryInputBuffer, realOutputBuffer);
+                input_buffer = temporaryInputBuffer[0];
+                return result;
+            }
+    };
+
+
+    template <const char * PULSE_NAME = DEFAULT_PULSE_NAME>
+    class SingleInputSerialCommunicator {
+        private:
+            std::shared_ptr<SerialCommunicator<1, 0, PULSE_NAME>> communicator;
+            std::array<std::bitset<0>, 0> output_buffer;
+
+        public:
+            SingleInputSerialCommunicator(
+                std::shared_ptr<LabsLand::Utils::TargetDevice> targetDevice, 
+                const std::string gpioName
+            ) {
+                std::array<std::string, 0> output_gpios;
+                const std::array<std::string, 1> input_gpios({gpioName});
+                this->communicator = std::make_shared<SerialCommunicator<1, 0, PULSE_NAME>>(targetDevice, input_gpios, output_gpios);
+            }
+
+            template <size_t IN_PULSES>
+            bool receiveSerialData(
+                std::array<std::bitset<IN_PULSES>, 1>& input_buffer
+            ) {
+                return this->communicator->performSerialCommunication<IN_PULSES, 0>(input_buffer, this->output_buffer);
+            }
+
+            template <size_t IN_PULSES>
+            bool receiveSerialData(
+                std::bitset<IN_PULSES>& input_buffer
+            ) {
+                std::array<std::bitset<IN_PULSES>, 1> temporaryInputBuffer;
+                bool result = this->communicator->template 
+                    performSerialCommunication<IN_PULSES, 0>(temporaryInputBuffer, this->output_buffer);
+                input_buffer = temporaryInputBuffer[0];
+                return result;
+            }
+    };
+
+    template <const char * PULSE_NAME = DEFAULT_PULSE_NAME>
+    class SingleOutputSerialCommunicator {
+        private:
+            std::shared_ptr<SerialCommunicator<0, 1, PULSE_NAME>> communicator;
+            std::array<std::bitset<0>, 0> input_buffer;
+
+        public:
+            SingleOutputSerialCommunicator(
+                std::shared_ptr<LabsLand::Utils::TargetDevice> targetDevice, 
+                const std::string & gpioName
+            ) {
+                std::array<std::string, 0> input_gpios;
+                std::array<std::string, 1> output_gpios({ gpioName });
+                this->communicator = std::make_shared<SerialCommunicator<0, 1, PULSE_NAME>>(targetDevice, input_gpios, output_gpios);
+            }
+
+            template <size_t OUT_PULSES>
+            bool sendSerialData(
+                const std::bitset<OUT_PULSES>& output_buffer
+            ) {
+                const std::array<std::bitset<OUT_PULSES>, 1> finalOutputBuffer({ output_buffer });
+                return this->communicator->performSerialCommunication<0, 1>(input_buffer, finalOutputBuffer);
+            }
+    };
+
+
+    class DefaultSingleSerialCommunicator
+        : public SingleSerialCommunicator<DEFAULT_PULSE_NAME>
+    {
+        public:
+            using SingleSerialCommunicator<DEFAULT_PULSE_NAME>::SingleSerialCommunicator;
+    };
+
+    class DefaultSingleInputSerialCommunicator
+        : public SingleInputSerialCommunicator<DEFAULT_PULSE_NAME> 
+    {
+        public:
+            using SingleInputSerialCommunicator<DEFAULT_PULSE_NAME>::SingleInputSerialCommunicator;
+    };
+
+    class DefaultSingleOutputSerialCommunicator
+        : public SingleOutputSerialCommunicator<DEFAULT_PULSE_NAME> 
+    {
+        public:
+            using SingleOutputSerialCommunicator<DEFAULT_PULSE_NAME>::SingleOutputSerialCommunicator;
+    };
 }
 
 #endif

@@ -11,6 +11,7 @@ add_executable(hybridapi
     src-stdcpp/labsland/simulations/targetdevicefiles.cpp
     src-stdcpp/labsland/protocols/i2ciowrapperfiles.cpp
 
+    src/labsland/simulations/utils/serial.cpp
     src/labsland/simulations/targetdevice.cpp
     src/labsland/simulations/watertanksimulation.cpp
     src/deusto/door.cpp

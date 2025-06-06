@@ -12,10 +12,10 @@ using namespace std;
 using namespace RHLab::ComputerFan;
 
 void ComputerFanSimulation::initialize(){
-    this->communicator = make_shared<LabsLand::Simulations::Utils::SerialCommunicator<1, 1>>(
+    this->communicator = make_shared<LabsLand::Simulations::Utils::DefaultSingleSerialCommunicator>(
         this->targetDevice, 
-        std::array<std::string, 1>({"rpm"}), // inputs
-        std::array<std::string, 1>({"temperature"}) // outputs
+        "rpm", // inputs
+        "temperature" // outputs
     );
 
     this->targetDevice->initializeSimulation({"temperature"}, {"latch", "pulse", "rpm"});
@@ -58,7 +58,7 @@ void ComputerFanSimulation::update(double delta) {
     
     int temp_int = static_cast<int>(round(this->mState.temperature));
     for (int i = BITS_PER_TEMP; i >= 0; i--) {
-        targetDeviceOutputData[0][i] = (temp_int >> (BITS_PER_TEMP - 1 - i)) & 1;
+        targetDeviceOutputData[i] = (temp_int >> (BITS_PER_TEMP - 1 - i)) & 1;
     }
 
     // Wait for latch to become 0
@@ -69,9 +69,9 @@ void ComputerFanSimulation::update(double delta) {
         // Fan speed update
         int rpm = 0;
         for (int i = BITS_PER_RPM-1; i >= 0; i--) {
-            rpm += targetDeviceInputData[0][i] ? pow(2, i) : 0;
+            rpm += targetDeviceInputData[i] ? pow(2, i) : 0;
         }
-        this->log() << "rpm array size: " << targetDeviceInputData[0].size() << endl;
+        this->log() << "rpm array size: " << targetDeviceInputData.size() << endl;
         this->log() << "rpm: " << rpm << endl;
         if (rpm < 600) rpm = 600;
         if (rpm > 3000) rpm = 3000;

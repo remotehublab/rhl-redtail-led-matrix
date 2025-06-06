@@ -166,12 +166,12 @@ namespace RHLab::ComputerFan {
 
     class ComputerFanSimulation : public Simulation<ComputerFanData, ComputerFanRequest> {
         private:
-            std::shared_ptr<LabsLand::Simulations::Utils::SerialCommunicator<1, 1>> communicator = nullptr;
+            std::shared_ptr<LabsLand::Simulations::Utils::DefaultSingleSerialCommunicator> communicator = nullptr;
             // Input GPIO data and channel names
-            array<bitset<BITS_PER_RPM>, 1> targetDeviceInputData;
+            bitset<BITS_PER_RPM> targetDeviceInputData;
             
             // Output GPIO data and channel names
-            array<bitset<BITS_PER_TEMP>, 1> targetDeviceOutputData;
+            bitset<BITS_PER_TEMP> targetDeviceOutputData;
 
         public:
             ComputerFanSimulation() = default;
