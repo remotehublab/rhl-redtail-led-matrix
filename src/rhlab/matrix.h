@@ -3,11 +3,11 @@
 #define MATRIXSIMULATION_H
 
 #include "../labsland/simulations/simulation.h"
+#include "../labsland/simulations/utils/serial.h"
 #include <string>
 #include <cstring>
 #include <sstream>
 #include <stdio.h>
-#include <vector>
 
 using namespace std;
 
@@ -65,10 +65,11 @@ namespace RHLab::LEDMatrix {
     };
 
     class MatrixSimulation : public Simulation<MatrixData, MatrixRequest> {
+        private:
+            std::shared_ptr<LabsLand::Simulations::Utils::InputSerialCommunicator<BITS_PER_LED>> communicator;
         public:
             MatrixSimulation() = default;
             void update(double delta) override;
-            bool readSerialCommunication(vector<vector<bool>>& buffer, vector<string>& gpios);
             void initialize() override;
     };
 }

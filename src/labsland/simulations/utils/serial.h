@@ -129,7 +129,7 @@ namespace LabsLand::Simulations::Utils {
     class OutputSerialCommunicator {
         private:
             std::shared_ptr<SerialCommunicator<0, N_OUTPUTS, PULSE_NAME>> communicator;
-            std::array<std::bitset<0>, 0>& input_buffer;
+            std::array<std::bitset<0>, 0> input_buffer;
 
         public:
             OutputSerialCommunicator(
@@ -152,7 +152,7 @@ namespace LabsLand::Simulations::Utils {
     class InputSerialCommunicator {
         private:
             std::shared_ptr<SerialCommunicator<N_INPUTS, 0, PULSE_NAME>> communicator;
-            const std::array<std::bitset<0>, 0> output_buffer;
+            std::array<std::bitset<0>, 0> output_buffer;
 
         public:
             InputSerialCommunicator(
@@ -167,7 +167,8 @@ namespace LabsLand::Simulations::Utils {
             bool receiveSerialData(
                 std::array<std::bitset<IN_PULSES>, N_INPUTS>& input_buffer
             ) {
-                return this->communicator->performSerialCommunication<N_INPUTS, 0>(input_buffer, this->output_buffer);
+                return this->communicator->template
+                    performSerialCommunication<IN_PULSES, 0>(input_buffer, this->output_buffer);
             }
     };
 
@@ -270,7 +271,6 @@ namespace LabsLand::Simulations::Utils {
                 return this->communicator->performSerialCommunication<0, 1>(input_buffer, finalOutputBuffer);
             }
     };
-
 
     class DefaultSingleSerialCommunicator
         : public SingleSerialCommunicator<DEFAULT_PULSE_NAME>
