@@ -64,6 +64,18 @@
                                     </td>
                                     {% endfor %}
                                 </tr>
+                                 <tr>
+                                    {% for n in range(config['SIMULATION_CONFIG']['gpios']['sim2dut']['number']) %}
+                                    <td id="gpios-sim2dut-result-{{ n }}">
+                                      <!-- keep the same wrapper so the layout lines up with the checkbox rows -->
+                                        <div class="gpio-sim2dut d-flex justify-content-center align-items-center">
+                                            <!-- this is where the live value will appear -->
+                                            <span class="sim2dut-value fw-semibold"
+                                                    id="gpios-sim2dut-{{ n }}-value">0</span>
+                                        </div>
+                                    </td>
+                                    {% endfor %}
+                                </tr>
                             </tbody>
                         </table>
                     {% endif %}

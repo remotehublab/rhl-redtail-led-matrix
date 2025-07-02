@@ -2,7 +2,7 @@
 const config = window.CONFIG.SIMULATION_CONFIG;
 const num_pulses = config.serial.dut2sim.num_pulses; // rows
 const num_outputs = config.serial.dut2sim.outputs.length; // cols
-var outputs = Array.from({ length: num_outputs }, () => Array(num_pulses).fill(false));
+const outputs = Array.from({ length: num_outputs }, () => Array(num_pulses).fill(0));
 
 
 function processSerialText(serialText) {
@@ -167,7 +167,6 @@ function dut2SimSendSerial(serialText) {
 function requestSim2DutGpios() {
     $.get(window.BASE_URL + "/gpios/sim2dut/?previous_response=" + window.SIM2DUT_STATUS).done(function (data) {
         window.SIM2DUT_STATUS = data.value;
-        console.log("dut2sim: " + data.value);
         for (var i = 0; i < data.value.length; i++) {
             if (data.value[i] == "1") {
                 $("#gpios-sim2dut-" + i).prop('checked', true);
@@ -184,7 +183,7 @@ function requestSim2DutGpios() {
 
 var outputs_new = Array.from({ length: num_outputs }, () => Array(num_pulses).fill(false));
 var pulse_count = 0;
-function requestDut2SimGpioFull() {
+function requestSerialCommunication() {
     $.get(window.BASE_URL + "/gpios/dut2sim/?previous_response=" + window.DUT2SIM_STATUS).done(function (data) {
         // console.log("sim2dut: " + data.value);
         var latch_index = config.serial.dut2sim.latch;
@@ -200,13 +199,20 @@ function requestDut2SimGpioFull() {
                     outputs_new[i][pulse_count] = (data2.value[i] == "1");
                 }
                 pulse_count += 1;
-                if (pulse_count >= num_pulses) {
-                outputs = outputs_new
-                console.log(outputs_new[0]);
-            }
+                if (pulse_count == num_pulses) {
+                    for (var i = 0; i < num_outputs; i++) {
+                        outputs[i] = 0
+                        for (var j = 0; j < num_pulses; j++) {
+                            if (outputs_new[i][j]) {
+                                outputs[i] += 2 ** (num_pulses - j - 1);
+                            }
+                        }
+                    }
+                    console.log(outputs);
+                } 
             })
         }
-        requestDut2SimGpioFull();
+        requestSerialCommunication();
     });
 }
 
@@ -282,7 +288,7 @@ function initializeGpios() {
 
     requestDut2SimGpios();
     requestSim2DutGpios();
-    requestDut2SimGpioFull()
+    requestSerialCommunication()
 }
 
 function initializeMessages() {
