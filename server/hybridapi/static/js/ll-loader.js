@@ -1,3 +1,10 @@
+// Creates a 2D array of num_pulses rows and num_outputs columns, initialized to false.
+const config = window.CONFIG.SIMULATION_CONFIG;
+const num_pulses = config.serial.dut2sim.num_pulses; // rows
+const num_outputs = config.serial.dut2sim.outputs.length; // cols
+var outputs = Array.from({ length: num_outputs }, () => Array(num_pulses).fill(false));
+
+
 function processSerialText(serialText) {
     var config = window.CONFIG.SIMULATION_CONFIG;
     var outputs = config.serial.dut2sim.outputs;      // e.g., [2, 3]
@@ -7,7 +14,8 @@ function processSerialText(serialText) {
 
     var blockSize = outputs.length;                // e.g., 2
     var expectedLength = numPulses * blockSize;
-    var timeBetweenPulses = 100;
+    var timeBetweenPulses = 150;
+ 
 
     // a) Validate the length of serialText.
     if (serialText.length !== expectedLength) {
@@ -159,7 +167,7 @@ function dut2SimSendSerial(serialText) {
 function requestSim2DutGpios() {
     $.get(window.BASE_URL + "/gpios/sim2dut/?previous_response=" + window.SIM2DUT_STATUS).done(function (data) {
         window.SIM2DUT_STATUS = data.value;
-
+        console.log("dut2sim: " + data.value);
         for (var i = 0; i < data.value.length; i++) {
             if (data.value[i] == "1") {
                 $("#gpios-sim2dut-" + i).prop('checked', true);
@@ -174,10 +182,38 @@ function requestSim2DutGpios() {
     });
 }
 
+var outputs_new = Array.from({ length: num_outputs }, () => Array(num_pulses).fill(false));
+var pulse_count = 0;
+function requestDut2SimGpioFull() {
+    $.get(window.BASE_URL + "/gpios/dut2sim/?previous_response=" + window.DUT2SIM_STATUS).done(function (data) {
+        // console.log("sim2dut: " + data.value);
+        var latch_index = config.serial.dut2sim.latch;
+        var pulse_index = config.serial.dut2sim.pulse;
+        if (data.value[latch_index] == "1") {
+            // create new empty outputs
+            outputs_new = Array.from({ length: num_outputs }, () => Array(num_pulses).fill(false));
+            pulse_count = 0;
+        } else if (data.value[pulse_index] == "1") {
+            $.get(`${window.BASE_URL}/gpios/sim2dut/`).done(function (data2) {
+                for (var i = 0; i < data2.value.length; i++) {
+                    console.log("setting outputs_new[" + i + "][" + pulse_count + "] = " + data2.value[i]);
+                    outputs_new[i][pulse_count] = (data2.value[i] == "1");
+                }
+                pulse_count += 1;
+                if (pulse_count >= num_pulses) {
+                outputs = outputs_new
+                console.log(outputs_new[0]);
+            }
+            })
+        }
+        requestDut2SimGpioFull();
+    });
+}
+
+
 function requestDut2SimGpios() {
     $.get(window.BASE_URL + "/gpios/dut2sim/?previous_response=" + window.DUT2SIM_STATUS).done(function (data) {
         window.DUT2SIM_STATUS = data.value;
-
         for (var i = 0; i < data.value.length; i++) {
             if (data.value[i] == "1") {
                 $("#gpios-dut2sim-" + i).prop('checked', true);
@@ -246,6 +282,7 @@ function initializeGpios() {
 
     requestDut2SimGpios();
     requestSim2DutGpios();
+    requestDut2SimGpioFull()
 }
 
 function initializeMessages() {

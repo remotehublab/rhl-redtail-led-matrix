@@ -60,6 +60,13 @@ void ComputerFanSimulation::update(double delta) {
     for (int i = BITS_PER_TEMP; i >= 0; i--) {
         targetDeviceOutputData[i] = (temp_int >> (BITS_PER_TEMP - 1 - i)) & 1;
     }
+    // reverse the bits so the result is <extra bits, if any> MSB...LSB
+    for (int i = 0; i < BITS_PER_TEMP / 2; ++i) {
+        bool bit = targetDeviceOutputData[i];
+        targetDeviceOutputData[i] = targetDeviceOutputData[BITS_PER_TEMP - i - 1];
+        targetDeviceOutputData[BITS_PER_TEMP - i - 1] = bit;
+    }
+
 
     // Wait for latch to become 0
     while (this->targetDevice->getGpio("latch") == 1) {}
